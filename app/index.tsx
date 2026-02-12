@@ -12,11 +12,14 @@ export default function Index() {
     const checkAuthentication = async () => {
       try {
         const isAuthenticated = await AsyncStorage.getItem("isAuthenticated");
+        const hasSeenOnboarding = await AsyncStorage.getItem("hasSeenOnboarding");
         
         if (isAuthenticated === "true") {
           router.replace("/(tabs)/home");
-        } else {
+        } else if (hasSeenOnboarding === "true") {
           router.replace("/signin/page"); 
+        } else {
+          router.replace("/onboarding/page");
         }
       } catch (error) {
         console.error("Auth check error:", error);

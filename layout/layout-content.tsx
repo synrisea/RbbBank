@@ -2,12 +2,15 @@ import { Stack } from "expo-router";
 import { Text, View } from "react-native";
 import { useLayoutFonts } from "@/hooks/use-fonts";
 import { poppins_font } from "@/constants/poppins"; 
+import { useAppSettings } from "@/hooks/use-app-settings";
 
 export default function LayoutContent() {
   const { loaded, error } = useLayoutFonts(poppins_font);
+  const { theme } = useAppSettings();
+  const isDarkMode = theme === 'dark';
 
   if (!loaded) {
-    return <View style={{ flex: 1, backgroundColor: '#0F121E' }} />;
+    return <View style={{ flex: 1, backgroundColor: isDarkMode ? '#0F121E' : '#F8FAFC' }} />;
   }
   
   if (error) {
@@ -18,7 +21,7 @@ export default function LayoutContent() {
       <Stack
         screenOptions={{
           headerShown: false,
-          contentStyle: { backgroundColor: '#0F121E' }, 
+          contentStyle: { backgroundColor: isDarkMode ? '#0F121E' : '#F8FAFC' }, 
         }}
       >
       <Stack.Screen
