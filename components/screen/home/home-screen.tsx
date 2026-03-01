@@ -5,7 +5,6 @@ import TopUpScreen from '@/components/screen/topup/topup-screen';
 import { FlipCard } from '@/components/ui/flip-card';
 import { translations } from '@/constants/translations';
 import { useAppSettings } from '@/hooks/use-app-settings';
-import { useNotifications } from '@/hooks/use-notifications';
 import { CardType } from '@/types/card';
 import { TransactionType } from '@/types/transaction';
 import { Ionicons } from '@expo/vector-icons';
@@ -24,8 +23,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 const { width } = Dimensions.get('window');
 
 export default function HomeScreen() {
+    const router = useRouter();
     const { language, theme, userAvatar } = useAppSettings();
-    const { sendEmailNotification } = useNotifications();
     const t = translations[language];
     const isDarkMode = theme === 'dark';
 
@@ -97,10 +96,6 @@ export default function HomeScreen() {
         setCards(updatedCards);
         setTransactions(updatedTransactions);
         setTopupModalVisible(false);
-        sendEmailNotification(
-            "Top Up Successful",
-            `You have successfully topped up $${amount.toFixed(2)} to your card ending in ${updatedCards[cardIndex].cardNumber.slice(-4)}.`
-        );
     };
 
     const handleTransaction = async (amount: number, cardId: string, recipient: string) => {
@@ -129,10 +124,6 @@ export default function HomeScreen() {
         setCards(updatedCards);
         setTransactions(updatedTransactions);
         setSendModalVisible(false);
-        sendEmailNotification(
-            "Money Sent",
-            `You have successfully sent $${amount.toFixed(2)} to ${recipient}.`
-        );
     };
 
     const handleLoan = async (amount: number) => {
@@ -179,7 +170,6 @@ export default function HomeScreen() {
                             <Text style={[styles.userNameText, !isDarkMode && styles.textLight]}>{userName}</Text>
                         </View>
                     </View>
-                    <View style={[styles.searchCircle, !isDarkMode && styles.searchCircleLight]}><Ionicons name="search" size={20} color={isDarkMode ? "white" : "#1E293B"} /></View>
                 </View>
 
                 <FlatList

@@ -1,30 +1,43 @@
-import React, { useState } from 'react';
-import { 
-  View, Text, StyleSheet, FlatList, Pressable, TextInput, 
-  ScrollView, Dimensions, LayoutAnimation, Platform 
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { FlipCard } from '@/components/ui/flip-card';
+import { translations } from '@/constants/translations';
+import { useAppSettings } from '@/hooks/use-app-settings';
 import { CardType } from '@/types/card';
+import { Ionicons } from '@expo/vector-icons';
+import React, { useState } from 'react';
+import {
+  Dimensions,
+  FlatList,
+  LayoutAnimation,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View
+} from 'react-native';
 
 const { width } = Dimensions.get('window');
 
 const PRESETS = ['10', '20', '50', '100', '250', '500'];
 
 const PAYMENT_METHODS = [
-    { id: '1', name: 'Apple Pay', icon: 'logo-apple', color: '#000000' },
-    { id: '2', name: 'Mastercard **** 4242', icon: 'card-outline', color: '#EB001B' },
-    { id: '3', name: 'Bank Account', icon: 'business-outline', color: '#10B981' },
+  { id: '1', name: 'Apple Pay', icon: 'logo-apple', color: '#000000', lightColor: '#000000' },
+  { id: '2', name: 'Mastercard **** 4242', icon: 'card-outline', color: '#EB001B', lightColor: '#EB001B' },
+  { id: '3', name: 'Bank Account', icon: 'business-outline', color: '#10B981', lightColor: '#10B981' },
 ];
 
-export default function TopUpScreen({ cards, onBack, onConfirm }: { 
-  cards: CardType[], 
+export default function TopUpScreen({ cards, onBack, onConfirm }: {
+  cards: CardType[],
   onBack: () => void,
-  onConfirm: (amount: number, cardId: string) => void 
+  onConfirm: (amount: number, cardId: string) => void
 }) {
   const [selectedCardIdx, setSelectedCardIdx] = useState(0);
   const [amount, setAmount] = useState('0');
   const [selectedMethod, setSelectedMethod] = useState('1');
+
+  const { theme, language } = useAppSettings();
+  const isDarkMode = theme === 'dark';
+  const t = translations[language];
 
   const handlePresetPress = (val: string) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -32,19 +45,19 @@ export default function TopUpScreen({ cards, onBack, onConfirm }: {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, !isDarkMode && styles.containerLight]}>
       {/* Header */}
       <View style={styles.header}>
         <Pressable onPress={onBack} hitSlop={20}>
-          <Ionicons name="close-outline" size={32} color="white" />
+          <Ionicons name="close-outline" size={32} color={isDarkMode ? "white" : "#1E293B"} />
         </Pressable>
-        <Text style={styles.headerTitle}>Top Up Balance</Text>
+        <Text style={[styles.headerTitle, !isDarkMode && styles.textLight]}>{t.topup}</Text>
         <View style={{ width: 32 }} />
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Куда зачисляем */}
-        <Text style={styles.sectionLabel}>Select Destination Card</Text>
+        <Text style={[styles.sectionLabel, !isDarkMode && styles.textLightSecondary]}>{t.selectCard}</Text>
         <FlatList
           data={cards}
           horizontal
@@ -68,7 +81,7 @@ export default function TopUpScreen({ cards, onBack, onConfirm }: {
           <View style={styles.amountContainer}>
             <Text style={styles.currencySymbol}>$</Text>
             <TextInput
-              style={styles.amountInput}
+              style={[styles.amountInput, !isDarkMode && styles.textLight]}
               keyboardType="numeric"
               value={amount}
               onChangeText={setAmount}
@@ -80,12 +93,20 @@ export default function TopUpScreen({ cards, onBack, onConfirm }: {
           {/* Пресеты сумм */}
           <View style={styles.presetsGrid}>
             {PRESETS.map((val) => (
-              <Pressable 
-                key={val} 
-                style={[styles.presetBtn, amount === val && styles.presetBtnActive]}
+              <Pressable
+                key={val}
+                style={[
+                  styles.presetBtn,
+                  !isDarkMode && styles.presetBtnLight,
+                  amount === val && styles.presetBtnActive
+                ]}
                 onPress={() => handlePresetPress(val)}
               >
-                <Text style={[styles.presetText, amount === val && styles.presetTextActive]}>
+                <Text style={[
+                  styles.presetText,
+                  !isDarkMode && styles.textLight,
+                  amount === val && styles.presetTextActive
+                ]}>
                   +${val}
                 </Text>
               </Pressable>
@@ -93,29 +114,33 @@ export default function TopUpScreen({ cards, onBack, onConfirm }: {
           </View>
 
           {/* Метод оплаты */}
-          <Text style={styles.sectionLabel}>Payment Method</Text>
+          <Text style={[styles.sectionLabel, !isDarkMode && styles.textLightSecondary, { marginTop: 0 }]}>{t.paymentMethod}</Text>
           {PAYMENT_METHODS.map((method) => (
-            <Pressable 
-              key={method.id} 
-              style={[styles.methodItem, selectedMethod === method.id && styles.methodItemActive]}
+            <Pressable
+              key={method.id}
+              style={[
+                styles.methodItem,
+                !isDarkMode && styles.methodItemLight,
+                selectedMethod === method.id && (isDarkMode ? styles.methodItemActive : styles.methodItemActiveLight)
+              ]}
               onPress={() => setSelectedMethod(method.id)}
             >
-              <View style={[styles.iconBox, { backgroundColor: method.color + '20' }]}>
-                <Ionicons name={method.icon as any} size={24} color={method.color} />
+              <View style={[styles.iconBox, { backgroundColor: (isDarkMode ? method.color : method.lightColor) + '20' }]}>
+                <Ionicons name={method.icon as any} size={24} color={isDarkMode ? method.color : method.lightColor} />
               </View>
-              <Text style={styles.methodName}>{method.name}</Text>
-              <View style={styles.radio}>
+              <Text style={[styles.methodName, !isDarkMode && styles.textLight]}>{method.name}</Text>
+              <View style={[styles.radio, !isDarkMode && styles.radioLight]}>
                 {selectedMethod === method.id && <View style={styles.radioInner} />}
               </View>
             </Pressable>
           ))}
 
-          <Pressable 
+          <Pressable
             style={[styles.topUpBtn, parseFloat(amount) <= 0 && styles.disabledBtn]}
             onPress={() => onConfirm(parseFloat(amount), cards[selectedCardIdx].id)}
             disabled={parseFloat(amount) <= 0}
           >
-            <Text style={styles.topUpBtnText}>Top Up Now</Text>
+            <Text style={styles.topUpBtnText}>{t.topUpNow}</Text>
           </Pressable>
         </View>
       </ScrollView>
@@ -125,6 +150,9 @@ export default function TopUpScreen({ cards, onBack, onConfirm }: {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0F121E' },
+  containerLight: { backgroundColor: '#F8FAFC' },
+  textLight: { color: '#1E293B' },
+  textLightSecondary: { color: '#64748B' },
   header: { flexDirection: 'row', justifyContent: 'space-between', padding: 20, alignItems: 'center', marginTop: 40 },
   headerTitle: { color: 'white', fontSize: 20, fontWeight: 'bold' },
   sectionLabel: { color: '#94A3B8', fontSize: 14, marginHorizontal: 20, marginTop: 30, marginBottom: 15, textTransform: 'uppercase', letterSpacing: 1 },
@@ -134,14 +162,18 @@ const styles = StyleSheet.create({
   amountInput: { color: 'white', fontSize: 60, fontWeight: 'bold', minWidth: 100, textAlign: 'center' },
   presetsGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginBottom: 30 },
   presetBtn: { width: '31%', backgroundColor: '#1A1D29', paddingVertical: 15, borderRadius: 16, alignItems: 'center', marginBottom: 10, borderWidth: 1, borderColor: '#334155' },
+  presetBtnLight: { backgroundColor: 'white', borderColor: '#E2E8F0', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2, elevation: 1 },
   presetBtnActive: { borderColor: '#0066FF', backgroundColor: '#0066FF20' },
   presetText: { color: 'white', fontSize: 16, fontWeight: '600' },
   presetTextActive: { color: '#0066FF' },
   methodItem: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#1A1D29', padding: 16, borderRadius: 20, marginBottom: 12, borderWidth: 1, borderColor: 'transparent' },
+  methodItemLight: { backgroundColor: 'white', borderColor: '#E2E8F0', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2, elevation: 1 },
   methodItemActive: { borderColor: '#334155', backgroundColor: '#1E293B' },
+  methodItemActiveLight: { borderColor: '#0066FF', backgroundColor: '#F0F9FF' },
   iconBox: { width: 48, height: 48, borderRadius: 14, justifyContent: 'center', alignItems: 'center', marginRight: 15 },
   methodName: { color: 'white', fontSize: 16, flex: 1, fontWeight: '500' },
   radio: { width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: '#475569', justifyContent: 'center', alignItems: 'center' },
+  radioLight: { borderColor: '#CBD5E1' },
   radioInner: { width: 12, height: 12, borderRadius: 6, backgroundColor: '#0066FF' },
   topUpBtn: { backgroundColor: '#0066FF', height: 64, borderRadius: 24, justifyContent: 'center', alignItems: 'center', marginTop: 20 },
   disabledBtn: { opacity: 0.5, backgroundColor: '#1E293B' },

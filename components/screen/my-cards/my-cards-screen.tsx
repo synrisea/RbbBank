@@ -78,7 +78,7 @@ export default function MyCardsScreenContent() {
             <FlipCard item={item} />
             <Pressable style={styles.deleteBtn} onPress={() => deleteCard(index)}>
               <Ionicons name="trash-outline" size={20} color="#FF4D4D" />
-              <Text style={styles.deleteText}>{t.cards} - Remove</Text>
+              <Text style={styles.deleteText}>Remove</Text>
             </Pressable>
           </View>
         )}

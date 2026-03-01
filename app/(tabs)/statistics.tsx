@@ -22,7 +22,7 @@ export default function StatisticsScreen() {
   const isDarkMode = theme === 'dark';
   const t = translations[language];
   const [transactions, setTransactions] = useState<TransactionType[]>([]);
-  const [activeTab, setActiveTab] = useState('Expense');
+  const [activeTab, setActiveTab] = useState('Expense'); // Depending on the actual translations it will match below in mapping
 
   const loadTransactions = async () => {
     const data = await AsyncStorage.getItem('@transactions');
@@ -61,6 +61,13 @@ export default function StatisticsScreen() {
     { name: 'Entertainment', amount: 150, color: '#8B5CF6', icon: 'game-controller' },
   ];
 
+  // Ensuring the initial Active Tab picks up the correctly translated word.
+  useFocusEffect(
+    React.useCallback(() => {
+      if (activeTab === 'Expense') setActiveTab(t.expense);
+    }, [t.expense])
+  );
+
   return (
     <SafeAreaView style={[styles.container, !isDarkMode && styles.containerLight]}>
       <View style={styles.header}>
@@ -72,7 +79,7 @@ export default function StatisticsScreen() {
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         <View style={[styles.totalCard, !isDarkMode && styles.cardLight]}>
-          <Text style={styles.totalLabel}>{t.totalBalance}</Text>
+          <Text style={[styles.totalLabel, !isDarkMode && styles.textLightSecondary]}>{t.totalBalance}</Text>
           <Text style={[styles.totalAmount, !isDarkMode && styles.textLight]}>$ {(totalIncome - totalExpense).toFixed(2)}</Text>
 
           <View style={styles.statsRow}>
@@ -81,7 +88,7 @@ export default function StatisticsScreen() {
                 <Ionicons name="arrow-down" size={16} color="#10B981" />
               </View>
               <View>
-                <Text style={styles.statLabel}>{t.income}</Text>
+                <Text style={[styles.statLabel, !isDarkMode && styles.textLightSecondary]}>{t.income}</Text>
                 <Text style={[styles.statValue, !isDarkMode && styles.textLight]}>$ {totalIncome.toFixed(2)}</Text>
               </View>
             </View>
@@ -90,7 +97,7 @@ export default function StatisticsScreen() {
                 <Ionicons name="arrow-up" size={16} color="#EF4444" />
               </View>
               <View>
-                <Text style={styles.statLabel}>{t.expense}</Text>
+                <Text style={[styles.statLabel, !isDarkMode && styles.textLightSecondary]}>{t.expense}</Text>
                 <Text style={[styles.statValue, !isDarkMode && styles.textLight]}>$ {totalExpense.toFixed(2)}</Text>
               </View>
             </View>
@@ -104,30 +111,38 @@ export default function StatisticsScreen() {
               style={[styles.tab, activeTab === tab && (isDarkMode ? styles.activeTab : styles.activeTabLight)]}
               onPress={() => setActiveTab(tab)}
             >
-              <Text style={[styles.tabText, activeTab === tab && styles.activeTabText, !isDarkMode && !activeTab && styles.textLightSecondary]}>{tab}</Text>
+              <Text
+                style={[
+                  styles.tabText,
+                  !isDarkMode && styles.textLightSecondary,
+                  activeTab === tab && (isDarkMode ? styles.activeTabText : styles.activeTabTextLight),
+                ]}
+              >
+                {tab}
+              </Text>
             </Pressable>
           ))}
         </View>
 
         <View style={[styles.chartPlaceholder, !isDarkMode && styles.cardLight]}>
-          <Text style={styles.placeholderText}>{t.recentActivity}</Text>
+          <Text style={[styles.placeholderText, !isDarkMode && styles.textLightSecondary]}>{t.recentActivity}</Text>
           <View style={styles.barContainer}>
             {chartData.length > 0 ? chartData.map((data, i) => (
               <View key={i} style={[styles.bar, { height: data.height, backgroundColor: data.isIncome ? '#10B981' : '#0066FF' }]} />
             )) : (
               [40, 70, 45, 90, 65, 80, 50].map((h, i) => (
-                <View key={i} style={[styles.bar, { height: h }]} />
+                <View key={i} style={[styles.bar, { height: h, backgroundColor: (isDarkMode ? '#0066FF' : '#0066FF80') }]} />
               ))
             )}
           </View>
           <View style={styles.chartLegend}>
             <View style={styles.legendItem}>
               <View style={[styles.legendDot, { backgroundColor: '#10B981' }]} />
-              <Text style={styles.legendText}>{t.income}</Text>
+              <Text style={[styles.legendText, !isDarkMode && styles.textLightSecondary]}>{t.income}</Text>
             </View>
             <View style={styles.legendItem}>
               <View style={[styles.legendDot, { backgroundColor: '#0066FF' }]} />
-              <Text style={styles.legendText}>{t.expense}</Text>
+              <Text style={[styles.legendText, !isDarkMode && styles.textLightSecondary]}>{t.expense}</Text>
             </View>
           </View>
         </View>
@@ -158,14 +173,14 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0F121E' },
   containerLight: { backgroundColor: '#F8FAFC' },
   textLight: { color: '#1E293B' },
-  textLightSecondary: { color: 'rgba(30, 41, 59, 0.6)' },
+  textLightSecondary: { color: '#475569' },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 25, paddingVertical: 15 },
   headerTitle: { color: 'white', fontSize: 24, fontFamily: 'Poppins-Bold' },
   calendarBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255, 255, 255, 0.05)', justifyContent: 'center', alignItems: 'center' },
   calendarBtnLight: { backgroundColor: 'rgba(0, 0, 0, 0.05)' },
   scrollContent: { paddingHorizontal: 25, paddingBottom: 40 },
-  totalCard: { backgroundColor: '#1A1D29', borderRadius: 24, padding: 25, alignItems: 'center', marginTop: 10 },
-  cardLight: { backgroundColor: 'white', elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4 },
+  totalCard: { backgroundColor: '#1A1D29', borderRadius: 24, padding: 25, alignItems: 'center', marginTop: 10, borderWidth: 1, borderColor: 'transparent' },
+  cardLight: { backgroundColor: 'white', borderColor: '#E2E8F0', borderWidth: 1, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 5, elevation: 2 },
   totalLabel: { color: 'rgba(255, 255, 255, 0.5)', fontSize: 14, fontFamily: 'Poppins-Regular', marginBottom: 5 },
   totalAmount: { color: 'white', fontSize: 32, fontFamily: 'Poppins-Bold', marginBottom: 25 },
   statsRow: { flexDirection: 'row', width: '100%', justifyContent: 'space-between', borderTopWidth: 1, borderTopColor: 'rgba(255, 255, 255, 0.05)', paddingTop: 20 },
@@ -174,13 +189,14 @@ const styles = StyleSheet.create({
   statLabel: { color: 'rgba(255, 255, 255, 0.4)', fontSize: 12, fontFamily: 'Poppins-Regular' },
   statValue: { color: 'white', fontSize: 14, fontFamily: 'Poppins-Bold' },
   tabBar: { flexDirection: 'row', backgroundColor: '#1A1D29', borderRadius: 16, padding: 6, marginTop: 30 },
-  tabBarLight: { backgroundColor: '#E6EEF9' },
+  tabBarLight: { backgroundColor: '#E2E8F0' },
   tab: { flex: 1, paddingVertical: 12, alignItems: 'center', borderRadius: 12 },
   activeTab: { backgroundColor: '#0F121E' },
-  activeTabLight: { backgroundColor: '#0066FF' },
+  activeTabLight: { backgroundColor: 'white', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2, elevation: 2 },
   tabText: { color: 'rgba(255, 255, 255, 0.5)', fontSize: 14, fontFamily: 'Poppins-Medium' },
   activeTabText: { color: 'white' },
-  chartPlaceholder: { backgroundColor: '#1A1D29', borderRadius: 24, marginTop: 30, padding: 20, alignItems: 'center' },
+  activeTabTextLight: { color: '#0066FF' },
+  chartPlaceholder: { backgroundColor: '#1A1D29', borderRadius: 24, marginTop: 30, padding: 20, alignItems: 'center', borderWidth: 1, borderColor: 'transparent' },
   placeholderText: { color: 'rgba(255, 255, 255, 0.5)', fontSize: 14, fontFamily: 'Poppins-Medium', marginBottom: 20 },
   barContainer: { flexDirection: 'row', alignItems: 'flex-end', gap: 15, height: 120, marginBottom: 20 },
   bar: { width: 15, backgroundColor: '#0066FF', borderRadius: 8 },
@@ -190,7 +206,7 @@ const styles = StyleSheet.create({
   legendText: { color: 'rgba(255, 255, 255, 0.4)', fontSize: 12 },
   categorySection: { marginTop: 40 },
   sectionTitle: { color: 'white', fontSize: 18, fontFamily: 'Poppins-Bold', marginBottom: 20 },
-  categoryItem: { flexDirection: 'row', alignItems: 'center', marginBottom: 20, backgroundColor: '#1A1D29', padding: 15, borderRadius: 20 },
+  categoryItem: { flexDirection: 'row', alignItems: 'center', marginBottom: 20, backgroundColor: '#1A1D29', padding: 15, borderRadius: 20, borderWidth: 1, borderColor: 'transparent' },
   catIconBox: { width: 44, height: 44, borderRadius: 12, justifyContent: 'center', alignItems: 'center', marginRight: 15 },
   catInfo: { flex: 1, marginRight: 15 },
   catName: { color: 'white', fontSize: 15, fontFamily: 'Poppins-Medium', marginBottom: 8 },

@@ -42,7 +42,7 @@ export default function SignInScreen() {
           Alert.alert("Error", "Invalid email or password");
         }
       } else {
-        // For testing purposes, if no user exists, create one
+
         await AsyncStorage.setItem("user", JSON.stringify({
           email: data.email,
           password: data.password,

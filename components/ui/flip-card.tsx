@@ -63,7 +63,7 @@ export const FlipCard = ({ item, disabled = false }: { item: any, disabled?: boo
   return (
     <Container onPress={disabled ? undefined : handleFlip} style={styles.cardWrapper} pointerEvents={disabled ? "none" : "auto"}>
       <Animated.View pointerEvents={disabled ? "none" : "auto"} style={[styles.cardContainer, { transform: [{ rotateY: frontInterpolate }], opacity: frontOpacity, backgroundColor: cardBgColor }]}>
-        <Image source={require('@/assets/images/card-bg.png')} style={styles.cardBg} resizeMode="cover" />
+        <Image source={require('@/assets/images/card-bg.png')} style={[styles.cardBg, !isDarkMode && { opacity: 0.15 }]} resizeMode="cover" />
         <View style={styles.cardOverlay}>
 
           <View style={styles.cardTopRow}>
@@ -76,7 +76,7 @@ export const FlipCard = ({ item, disabled = false }: { item: any, disabled?: boo
               const groups = (item.cardNumber || "").replace(/\s/g, '').match(/.{1,4}/g) || [];
               return (
                 <View key={index} style={styles.numberGroupContainer}>
-                  <Text style={styles.cardNumText}>
+                  <Text style={[styles.cardNumText, { color: textColor }]}>
                     {groups[index] || "****"}
                   </Text>
                 </View>
